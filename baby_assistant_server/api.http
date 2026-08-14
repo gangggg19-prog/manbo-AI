@@ -1,0 +1,134 @@
+### 1. 查询宝宝：把返回结果中的 id 复制到下面的 @babyId
+GET http://localhost:8080/api/v1/babies
+
+### 2. 开始睡眠：先替换 @babyId 的值，再点请求行左边的绿色三角
+@babyId = 618b988e-9588-4c64-9da8-b010c52e3f40
+POST http://localhost:8080/api/v1/sleep-sessions
+Content-Type: application/json
+
+{
+  "babyId": "{{babyId}}",
+  "startedAt": "2026-07-31T12:30:00Z"
+}
+
+### 3. 结束睡眠：把上一步响应中的 id 复制到 @sleepSessionId
+@sleepSessionId = 在这里粘贴睡眠会话的id
+PATCH http://localhost:8080/api/v1/sleep-sessions/{{sleepSessionId}}/end
+Content-Type: application/json
+
+{
+  "endedAt": "2026-07-31T14:00:00Z"
+}
+
+### 4. 查询当天睡眠记录
+GET http://localhost:8080/api/v1/sleep-sessions?babyId={{babyId}}&date=2026-07-31
+
+### 5. 查询当天喂养和尿布记录
+GET http://localhost:8080/api/v1/care-records?babyId={{babyId}}&date=2026-07-31
+### 6. 今日真实数据简报
+GET http://localhost:8080/api/v1/daily-summary?babyId={{babyId}}&date=2026-07-31
+### 7. 近期七天增长时间线
+GET http://localhost:8080/api/v1/growth-timeline?babyId={{babyId}}&days=7
+
+### 8. Ask the AI assistant (start Python on port 8000 for the rule-based reply)
+POST http://localhost:8080/api/v1/ai/chat
+Content-Type: application/json
+
+{
+  "babyId": "{{babyId}}",
+  "message": "今天睡得怎么样？"
+}
+### 9. Create an AI conversation
+POST http://localhost:8080/api/v1/ai/conversations
+Content-Type: application/json
+
+{
+  "babyId": "{{babyId}}"
+}
+
+### 10. Load latest AI conversation
+GET http://localhost:8080/api/v1/ai/conversations/latest?babyId={{babyId}}
+
+### 11. Load messages (replace conversation id)
+GET http://localhost:8080/api/v1/ai/conversations/{{conversationId}}/messages
+
+### 12. Register a Manbo demo account (run once)
+POST http://localhost:8080/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "username": "parent1",
+  "displayName": "妈妈",
+  "password": "change-me"
+}
+
+### 13. Login after the account already exists
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "parent1",
+  "password": "change-me"
+}
+
+### Copy accessToken from request 12 or 13 here (do not include Bearer)
+@accessToken = paste-access-token-here
+
+### 14. Create or claim the baby's private family room
+POST http://localhost:8080/api/v1/family-chat/rooms
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "babyId": "{{babyId}}"
+}
+
+### Copy the returned room id here
+@familyRoomId = paste-room-id-here
+
+### 15. Load private family messages
+GET http://localhost:8080/api/v1/family-chat/rooms/{{familyRoomId}}/messages
+Authorization: Bearer {{accessToken}}
+
+### 16. Send a message; Java gets the sender from the JWT
+POST http://localhost:8080/api/v1/family-chat/rooms/{{familyRoomId}}/messages
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "content": "刚刚记录了 120 ml 奶。"
+}
+
+### 17. Load message history again
+GET http://localhost:8080/api/v1/family-chat/rooms/{{familyRoomId}}/messages
+Authorization: Bearer {{accessToken}}
+### 18. Owner creates a one-time family invite (24 hours)
+POST http://localhost:8080/api/v1/family-invites
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "babyId": "{{babyId}}"
+}
+
+### Copy inviteCode above and a second account's accessToken here
+@inviteCode = paste-invite-code-here
+@secondAccessToken = paste-second-account-token-here
+
+### 19. Second signed-in account joins the baby's family
+POST http://localhost:8080/api/v1/family-invites/accept
+Authorization: Bearer {{secondAccessToken}}
+Content-Type: application/json
+
+{
+  "inviteCode": "{{inviteCode}}"
+}
+
+### 20. Run again to verify one-time use; expected response is 409
+POST http://localhost:8080/api/v1/family-invites/accept
+Authorization: Bearer {{secondAccessToken}}
+Content-Type: application/json
+
+{
+  "inviteCode": "{{inviteCode}}"
+}

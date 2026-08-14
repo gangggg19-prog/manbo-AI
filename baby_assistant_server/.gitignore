@@ -1,0 +1,15 @@
+.idea/
+*.iml
+target/
+*.class
+*.log
+.env
+.env.*
+!.env.example
+*.jks
+*.keystore
+*.p12
+*.pfx
+.idea/httpRequests/
+*.http.env.json
+

@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: baby-assistant-server
+  datasource:
+    url: ${BABY_DATABASE_URL:jdbc:postgresql://localhost:5432/baby_assistant}
+    username: ${BABY_DATABASE_USERNAME:baby_app}
+    password: ${BABY_DATABASE_PASSWORD}
+  flyway:
+    enabled: true
+mybatis:
+  type-handlers-package: com.mimo.babyassistantserver.mapper.typehandler
+  configuration:
+    map-underscore-to-camel-case: true
+server:
+  port: ${PORT:8080}
+ai:
+  service:
+    # Python stays replaceable: local FastAPI now, Nacos/Feign later if services split.
+    base-url: ${BABY_AI_SERVICE_BASE_URL:http://localhost:8000}
+auth:
+  jwt:
+    # Empty means JwtService generates an in-memory key for local development.
+    # Deployments must provide BABY_JWT_SECRET through a secret manager.
+    secret: ${BABY_JWT_SECRET:}
+    expiry-seconds: ${BABY_JWT_EXPIRY_SECONDS:604800}
